@@ -2,6 +2,7 @@
 
 import sys
 from pathlib import Path
+import statistics
 
 flowRateHe = 30
 initFlowRateCO = 2
@@ -33,8 +34,8 @@ def parse_spectrum(filepath):
     return [temperature, m, ic_rel]
 
 def find_const_baseline(i):
-    print('function find_const_baseline is not finished!')
-    return 0.00001
+    baseline = statistics.mode(i)
+    return baseline
 
 def find_CO2_concentration(m, icRel, mCal, icRelCal, flowRateHe, initFlowRateCO, initFlowRateO2):
     iBaseCal = find_const_baseline(icRelCal)
@@ -71,7 +72,13 @@ if specdir.is_dir() and calfile.is_file():
     print('parsed data length:', len(specdata))
     caldata = parse_spectrum(calfile)
     conversion = find_conversion(flowRateHe, initFlowRateCO, initFlowRateO2, specdata, caldata)
-    print('conversion:\n', conversion)
+    print('conversion\n', str(sorted(conversion)))
+    dataStr = 'temperature\tconversion\n'
+    for row in sorted(conversion):
+        dataStr = dataStr + str(row[0]) + '\t' + str(row[1]) + '\n'
+    resultsDir = specdir.joinpath('results')
+    resultsDir.mkdir()
+    resultsDir.joinpath('conversion.dat').open('w').write(dataStr)
 else:
     print_usage()
     quit()
