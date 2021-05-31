@@ -56,29 +56,31 @@ def find_conversion(flowRateHe, initFlowRateCO, initFlowRateO2, specdata, caldat
         conversionData.append([spectrum[0], conversion])
     return conversionData
 
+# script starts here
+
 try:
-    specdir = Path(sys.argv[1])
-    calfile = Path(sys.argv[2])
+    specdir = Path(sys.argv[1]) # directory with spectra datafiles
+    calfile = Path(sys.argv[2]) # calibration file
 except:
     print_usage()
     quit()
 
 if specdir.is_dir() and calfile.is_file():
     print('calculating conversion vs. temperature using files in:', specdir.resolve())
-    specdata = list()
+    specdata = list() # list will contain all spectrum data in a format: [[temperature1, [m11, m12, m13, ...], [i_rel11, i_rel12, i_rel13, ...]], [temperature2, [m21, m22, m23, ...], [i_rel21, i_rel22, irel23, ...]], ...]
     for file in specdir.iterdir():
         if file.is_file():
             specdata.append(parse_spectrum(file))
     print('parsed data length:', len(specdata))
     caldata = parse_spectrum(calfile)
-    conversion = find_conversion(flowRateHe, initFlowRateCO, initFlowRateO2, specdata, caldata)
+    conversion = find_conversion(flowRateHe, initFlowRateCO, initFlowRateO2, specdata, caldata) # list contains results in a format: [[temperature1, conversion1], [temperature2, conversion2], ...]
     print('conversion\n', str(sorted(conversion)))
     dataStr = 'temperature\tconversion\n'
     for row in sorted(conversion):
         dataStr = dataStr + str(row[0]) + '\t' + str(row[1]) + '\n'
     resultsDir = specdir.joinpath('results')
-    resultsDir.mkdir()
-    resultsDir.joinpath('conversion.dat').open('w').write(dataStr)
+    if not resultsDir.exists() : resultsDir.mkdir()
+    with resultsDir.joinpath('conversion.dat').open('w') as resultsFile: resultsFile.write(dataStr)
 else:
     print_usage()
     quit()
