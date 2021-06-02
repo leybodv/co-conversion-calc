@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 import statistics
 
-# 'standard' conditions of experiment
+# 'standard' conditions of experiment. Flowrates in sccm
 flowRateHe = 30
 initFlowRateCO = 2
 initFlowRateO2 = 4
